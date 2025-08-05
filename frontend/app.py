@@ -3,6 +3,16 @@ import requests
 import pandas as pd
 import plotly.express as px
 import speech_recognition as sr
+import subprocess
+import os
+import time
+
+# Start the FastAPI server (only once)
+if not os.path.exists("fastapi_started.txt"):
+    with open("fastapi_started.txt", "w") as f:
+        f.write("started")
+    subprocess.Popen(["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"])
+    time.sleep(3)  # Give FastAPI a few seconds to boot
 
 st.set_page_config(page_title="MindMosaic", layout="wide")
 

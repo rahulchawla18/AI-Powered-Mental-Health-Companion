@@ -7,6 +7,8 @@ import subprocess
 import os
 import time
 
+backend_url = st.secrets.get("BACKEND_URL", "http://localhost:8000")
+
 # Start the FastAPI server (only once)
 if not os.path.exists("fastapi_started.txt"):
     with open("fastapi_started.txt", "w") as f:
@@ -29,7 +31,7 @@ if not st.session_state.username:
     st.subheader("🔐 Login")
     username_input = st.text_input("Enter your username")
     if st.button("Login"):
-        res = requests.post("http://localhost:8000/login", json={"username": username_input})
+        res = requests.post(f"{backend_url}/login", json={"username": username_input})
         if res.status_code == 200:
             st.session_state.username = username_input
             st.success("Logged in successfully!")
@@ -62,7 +64,7 @@ else:
 
     if st.button("Analyze My Entry"):
         with st.spinner("Analyzing..."):
-            response = requests.post("http://localhost:8000/analyze", json={
+            response = requests.post(f"{backend_url}/analyze", json={
                 "username": st.session_state.username,
                 "text": entry
             })
@@ -82,7 +84,7 @@ else:
             st.write(f"💡 Primary Suggestion: {data['suggestions'][0]}")
 
             if data['emotion'] not in ["happy", "neutral"]:
-                uplift_response = requests.get(f"http://localhost:8000/uplift/{data['emotion']}")
+                uplift_response = requests.get(f"{backend_url}/uplift/{data['emotion']}")
                 if uplift_response.status_code == 200:
                     uplift = uplift_response.json()
                     for suggestion in uplift.get("activities", []):
@@ -95,7 +97,7 @@ else:
     st.markdown("---")
     st.subheader("📊 Emotion Trend")
     if st.button("Show Chart"):
-        hist = requests.get(f"http://localhost:8000/history/{st.session_state.username}")
+        hist = requests.get(f"{backend_url}/history/{st.session_state.username}")
         df = pd.DataFrame(hist.json())
 
         if not df.empty:
@@ -126,7 +128,7 @@ else:
     st.subheader("🔎 Semantic Search")
     search_text = st.text_input("Search your journal")
     if st.button("Search"):
-        results = requests.post("http://localhost:8000/search", json={
+        results = requests.post(f"{backend_url}/search", json={
             "username": st.session_state.username,
             "query": search_text
         })
